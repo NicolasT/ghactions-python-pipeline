@@ -35,7 +35,7 @@ RUN --mount=type=cache,id=yum-centos7,target=/var/cache/yum,sharing=locked \
         rpm-build \
         rpmdevtools \
     && \
-    yum makecache --repo epel && \
+    yum makecache && \
     useradd -m -U build
 
 USER build
