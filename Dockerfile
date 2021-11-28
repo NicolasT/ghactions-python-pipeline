@@ -45,7 +45,7 @@ RUN --network=none \
 # }}}
 
 # {{{ Build SRPM package
-FROM centos-build as build-srpm
+FROM centos8-build as build-srpm
 
 COPY ghactions-python-pipeline.spec rpmbuild/SPECS/
 COPY artefacts/ghactions-python-pipeline-*.tar.gz rpmbuild/SOURCES/
