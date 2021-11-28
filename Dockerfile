@@ -25,3 +25,39 @@ FROM scratch as artefacts-sdist
 
 COPY --from=build-sdist /home/build/dist/* /
 # }}}
+
+# {{{ CentOS build host
+FROM docker.io/centos:7.9.2009 as centos7-build
+
+RUN --mount=type=cache,id=dnf-centos7,target=/var/cache/dnf,sharing=locked \
+    dnf install -y \
+        dnf-plugins-core \
+        epel-release \
+        rpm-build \
+        rpmdevtools \
+    && \
+    dnf makecache --repo epel && \
+    useradd -m -U build
+
+USER build
+WORKDIR /home/build
+
+RUN --network=none \
+    rpmdev-setuptree
+# }}}
+
+# {{{ Build SRPM package
+FROM centos7-build as build-srpm
+
+COPY ghactions-python-pipeline.spec rpmbuild/SPECS/
+COPY artefacts/ghactions-python-pipeline-*.tar.gz rpmbuild/SOURCES/
+
+RUN --network=none \
+    rpmbuild -bs rpmbuild/SPECS/artesca-kerberos-auth.spec
+# }}}
+
+# {{{ Container for SRPM
+FROM scratch as artefacts-srpm
+
+COPY --from=build-srpm /home/build/rpmbuild/SRPMS/* /
+# }}}
