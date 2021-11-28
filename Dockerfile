@@ -52,7 +52,7 @@ COPY ghactions-python-pipeline.spec rpmbuild/SPECS/
 COPY artefacts/ghactions-python-pipeline-*.tar.gz rpmbuild/SOURCES/
 
 RUN --network=none \
-    rpmbuild -bs rpmbuild/SPECS/artesca-kerberos-auth.spec
+    rpmbuild -bs rpmbuild/SPECS/ghactions-python-pipeline.spec
 # }}}
 
 # {{{ Container for SRPM
