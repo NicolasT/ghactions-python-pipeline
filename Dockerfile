@@ -29,14 +29,13 @@ COPY --from=build-sdist /home/build/dist/* /
 # {{{ CentOS build host
 FROM docker.io/centos:7.9.2009 as centos7-build
 
-RUN --mount=type=cache,id=dnf-centos7,target=/var/cache/dnf,sharing=locked \
-    dnf install -y \
-        dnf-plugins-core \
+RUN --mount=type=cache,id=yum-centos7,target=/var/cache/yum,sharing=locked \
+    yum install -y \
         epel-release \
         rpm-build \
         rpmdevtools \
     && \
-    dnf makecache --repo epel && \
+    yum makecache --repo epel && \
     useradd -m -U build
 
 USER build
