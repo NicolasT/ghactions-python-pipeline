@@ -53,6 +53,9 @@ jobs:
       - name: Placeholder
         run: true
 
+  fedora:
+    uses: ./build.yml
+
   e2e:
     runs-on: "ubuntu-latest"
     strategy:
