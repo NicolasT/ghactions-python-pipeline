@@ -141,3 +141,17 @@ RUN --mount=type=cache,id=dnf-fedora,target=/var/cache/dnf,sharing=locked \
 
 ENTRYPOINT ["ghactions-python-pipeline"]
 # }}}
+
+# {{{ E2E container for sdist packages
+FROM docker.io/alpine:3.15.0 as e2e-sdist
+
+RUN apk add --no-cache \
+    py3-pip
+
+ARG PACKAGE
+
+RUN --mount=type=bind,source=artefacts/,target=/tmp/artefacts
+    python -m pip install /tmp/artefacts/$PACKAGE
+
+ENTRYPOINT ["ghactions-python-pipeline"]
+# }}}
