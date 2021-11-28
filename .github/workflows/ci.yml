@@ -29,7 +29,8 @@ jobs:
               --cache-from=type=local,src=/tmp/.buildx-cache \
               --cache-to=type=local,dest=/tmp/.buildx-cache-new,mode=max \
               --target artefacts-sdist \
-              --output type=local,dest=artefacts
+              --output type=local,dest=artefacts \
+              .
 
       - name: Move Docker image cache
         # Temp fix
