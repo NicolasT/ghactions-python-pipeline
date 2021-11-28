@@ -84,7 +84,7 @@ FROM centos8-build as build-rpm-centos8
 COPY artefacts/ghactions-python-pipeline-*.src.rpm rpmbuild/SRPMS/
 
 USER root
-RUN --mount=type=cache,id=dnf-centos,target=/var/cache/dnf,sharing=locked \
+RUN --mount=type=cache,id=dnf-centos8,target=/var/cache/dnf,sharing=locked \
     dnf --setopt="keepcache=1" builddep -y rpmbuild/SRPMS/ghactions-python-pipeline-*.src.rpm
 
 USER build
@@ -125,10 +125,19 @@ FROM centos:8.4.2105 as e2e-centos8
 
 COPY artefacts/ghactions-python-pipeline-*.el8.noarch.rpm /tmp
 
-RUN --mount=type=cache,id=dnf-centos,target=/var/cache/dnf,sharing=locked \
-    dnf --setopt="keepcache=1" install -y /tmp/ghactions-python-pipeline-*.el8.noarch.rpm
+RUN --mount=type=cache,id=dnf-centos8,target=/var/cache/dnf,sharing=locked \
+    --mount=type=bind,source=artefacts/,target=/tmp/artefacts \
+    dnf --setopt="keepcache=1" install -y /tmp/artefacts/ghactions-python-pipeline-*.el8.noarch.rpm
 
 ENTRYPOINT ["ghactions-python-pipeline"]
 # }}}
 
+# {{{ CentOS 8 E2E container
+FROM docker.io/fedora:35 as e2e-fedora
 
+RUN --mount=type=cache,id=dnf-fedora,target=/var/cache/dnf,sharing=locked \
+    --mount=type=bind,source=artefacts/,target=/tmp/artefacts \
+    dnf --setopt="keepcache=1" install -y /tmp/artefacts/ghactions-python-pipeline-*.fc*.noarch.rpm
+
+ENTRYPOINT ["ghactions-python-pipeline"]
+# }}}
