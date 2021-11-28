@@ -68,7 +68,10 @@ jobs:
           - source-job: package-fedora-rpm
             target: e2e-fedora
     needs:
-      - ${{ matrix.source-job }}
+      - package-sdist
+      - package-centos7-rpm
+      - package-centos8-rpm
+      - package-fedora-rpm
     steps:
       - name: Placeholdder
         run: echo ${{ matrix.target }}
