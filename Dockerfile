@@ -45,7 +45,7 @@ RUN --network=none \
 # }}}
 
 # {{{ Build SRPM package
-FROM centos-build as build8-srpm
+FROM centos-build as build-srpm
 
 COPY ghactions-python-pipeline.spec rpmbuild/SPECS/
 COPY artefacts/ghactions-python-pipeline-*.tar.gz rpmbuild/SOURCES/
@@ -53,3 +53,10 @@ COPY artefacts/ghactions-python-pipeline-*.tar.gz rpmbuild/SOURCES/
 RUN --network=none \
     rpmbuild -bs rpmbuild/SPECS/artesca-kerberos-auth.spec
 # }}}
+
+# {{{ Container for SRPM
+FROM scratch as artefacts-srpm
+
+COPY --from=build-srpm /home/build/rpmbuild/SRPMS/* /
+# }}}
+
