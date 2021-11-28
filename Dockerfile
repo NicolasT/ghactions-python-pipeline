@@ -26,10 +26,28 @@ FROM scratch as artefacts-sdist
 COPY --from=build-sdist /home/build/dist/* /
 # }}}
 
-# {{{ CentOS build host
+# {{{ CentOS 8 build host
 FROM docker.io/centos:8.4.2105 as centos8-build
 
-RUN --mount=type=cache,id=dnf-centos,target=/var/cache/dnf,sharing=locked \
+RUN --mount=type=cache,id=dnf-centos8,target=/var/cache/dnf,sharing=locked \
+    dnf install -y \
+        dnf-plugins-core \
+        rpm-build \
+        rpmdevtools \
+    && \
+    useradd -m -U build
+
+USER build
+WORKDIR /home/build
+
+RUN --network=none \
+    rpmdev-setuptree
+# }}}
+
+# {{{ Fedora build host
+FROM docker.io/fedora:35 as fedora-build
+
+RUN --mount=type=cache,id=dnf-fedora,target=/var/cache/dnf,sharing=locked \
     dnf install -y \
         dnf-plugins-core \
         rpm-build \
@@ -60,7 +78,7 @@ FROM scratch as artefacts-srpm
 COPY --from=build-srpm /home/build/rpmbuild/SRPMS/* /
 # }}}
 
-# {{{ Build the RPM package
+# {{{ Build the CentOS 8 RPM
 FROM centos8-build as build-rpm-centos8
 
 COPY artefacts/ghactions-python-pipeline-*.src.rpm rpmbuild/SRPMS/
@@ -75,8 +93,29 @@ RUN --network=none \
     rpmbuild --rebuild rpmbuild/SRPMS/ghactions-python-pipeline-*.src.rpm
 # }}}
 
-# {{{ Container for CentOS 8 RPM
+# {{{ Container for the CentOS 8 RPM
 FROM scratch as artefacts-centos8-rpm
 
 COPY --from=build-rpm-centos8 /home/build/rpmbuild/RPMS/*/* /
+# }}}
+
+# {{{ Build the Fedora RPM
+FROM fedora-build as build-rpm-fedora
+
+COPY artefacts/ghactions-python-pipeline-*.src.rpm rpmbuild/SRPMS/
+
+USER root
+RUN --mount=type=cache,id=dnf-fedora,target=/var/cache/dnf,sharing=locked \
+    dnf --setopt="keepcache=1" builddep -y rpmbuild/SRPMS/ghactions-python-pipeline-*.src.rpm
+
+USER build
+
+RUN --network=none \
+    rpmbuild --rebuild rpmbuild/SRPMS/ghactions-python-pipeline-*.src.rpm
+# }}}
+
+# {{{ Container for the Fedora RPM
+FROM scratch as artefacts-fedora-rpm
+
+COPY --from=build-rpm-fedora /home/build/rpmbuild/RPMS/*/* /
 # }}}
