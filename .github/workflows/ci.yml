@@ -23,7 +23,7 @@ jobs:
       - name: Placeholder
         run: true
 
-  package-centos7-rpm:
+  package-centos7:
     runs-on: "ubuntu-latest"
     needs:
       - package-srpm
@@ -31,7 +31,15 @@ jobs:
       - name: Placeholder
         run: true
 
-  package-centos8-rpm:
+  e2e-centos7:
+    runs-on: "ubuntu-latest"
+    needs:
+      - package-centos7
+    steps:
+      - name: Placeholder
+        run: true
+
+  package-centos8:
     runs-on: "ubuntu-latest"
     needs:
       - package-srpm
@@ -39,10 +47,26 @@ jobs:
       - name: Placeholder
         run: true
 
-  package-fedora-rpm:
+  e2e-centos8:
+    runs-on: "ubuntu-latest"
+    needs:
+      - package-centos8
+    steps:
+      - name: Placeholder
+        run: true
+
+  package-fedora:
     runs-on: "ubuntu-latest"
     needs:
       - package-srpm
+    steps:
+      - name: Placeholder
+        run: true
+
+  e2e-fedora:
+    runs-on: "ubuntu-latest"
+    needs:
+      - package-fedora
     steps:
       - name: Placeholder
         run: true
@@ -53,31 +77,12 @@ jobs:
       - name: Placeholder
         run: true
 
-  fedora:
-    uses: NicolasT/ghactions-python-pipeline/.github/workflows/build.yml
-
   e2e:
     runs-on: "ubuntu-latest"
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - source-job: package-sdist
-            target: e2e-sdist
-          - source-job: package-centos7-rpm
-            target: e2e-centos7
-          - source-job: package-centos8-rpm
-            target: e2e-centos8
-          - source-job: package-fedora-rpm
-            target: e2e-fedora
     needs:
-      - package-sdist
-      - package-centos7-rpm
-      - package-centos8-rpm
-      - package-fedora-rpm
-    steps:
-      - name: Placeholdder
-        run: echo ${{ matrix.target }}
+      - e2e-centos7
+      - e2e-centos8
+      - e2e-fedora
 
   release:
     runs-on: "ubuntu-latest"
