@@ -54,7 +54,7 @@ jobs:
         run: true
 
   fedora:
-    uses: NicolasT/ghactions-python-pipeline/.github/workflows/build.yml@${{ github.sha }}
+    uses: NicolasT/ghactions-python-pipeline/.github/workflows/build.yml
 
   e2e:
     runs-on: "ubuntu-latest"
