@@ -121,3 +121,16 @@ FROM scratch as artefacts-fedora-rpm
 
 COPY --from=build-rpm-fedora /home/build/rpmbuild/RPMS/*/* /
 # }}}
+
+# {{{ CentOS 8 E2E container
+FROM centos:8.4.2105 as e2e-centos8
+
+COPY artefacts/ghactions-python-pipeline-*.el8.noarch.rpm /tmp
+
+RUN --mount=type=cache,id=dnf-centos,target=/var/cache/dnf,sharing=locked \
+    dnf --setopt="keepcache=1" install -y /tmp/ghactions-python-pipeline-*.el8.noarch.rpm
+
+ENTRYPOINT ["ghactions-python-pipeline"]
+# }}}
+
+
