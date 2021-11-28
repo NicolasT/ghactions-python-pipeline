@@ -76,7 +76,7 @@ jobs:
               --cache-from=type=local,src=/tmp/.buildx-cache \
               --cache-to=type=local,dest=/tmp/.buildx-cache-new,mode=max \
               --target e2e-sdist \
-              --arg PACKAGE=ghactions-python-pipeline-*.tar.gz \
+              --build-arg PACKAGE=ghactions-python-pipeline-*.tar.gz \
               --tag ghactions-python-pipeline-e2e-sdist-tar:ci \
               --load \
               .
@@ -122,7 +122,7 @@ jobs:
               --cache-from=type=local,src=/tmp/.buildx-cache \
               --cache-to=type=local,dest=/tmp/.buildx-cache-new,mode=max \
               --target e2e-sdist \
-              --arg PACKAGE=ghactions-python-pipeline-*.whl \
+              --build-arg PACKAGE=ghactions-python-pipeline-*.whl \
               --tag ghactions-python-pipeline-e2e-sdist-wheel:ci \
               --load \
               .
