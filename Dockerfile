@@ -146,6 +146,7 @@ ENTRYPOINT ["ghactions-python-pipeline"]
 FROM docker.io/alpine:3.15.0 as e2e-sdist
 
 RUN apk add --no-cache \
+    python3 \
     py3-pip
 
 ARG PACKAGE
