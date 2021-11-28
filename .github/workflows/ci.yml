@@ -92,9 +92,9 @@ jobs:
     needs:
       - package-sdist
       - package-srpm
-      - package-centos7-rpm
-      - package-centos8-rpm
-      - package-fedora-rpm
+      - package-centos7
+      - package-centos8
+      - package-fedora
       - test
       - e2e
     steps:
