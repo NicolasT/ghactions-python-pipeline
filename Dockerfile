@@ -27,15 +27,14 @@ COPY --from=build-sdist /home/build/dist/* /
 # }}}
 
 # {{{ CentOS build host
-FROM docker.io/centos:7.9.2009 as centos7-build
+FROM docker.io/centos:8.4.2105 as centos8-build
 
-RUN --mount=type=cache,id=yum-centos7,target=/var/cache/yum,sharing=locked \
-    yum install -y \
-        epel-release \
+RUN --mount=type=cache,id=dnf-centos,target=/var/cache/dnf,sharing=locked \
+    dnf install -y \
+        dnf-plugins-core \
         rpm-build \
         rpmdevtools \
     && \
-    yum makecache && \
     useradd -m -U build
 
 USER build
@@ -46,17 +45,11 @@ RUN --network=none \
 # }}}
 
 # {{{ Build SRPM package
-FROM centos7-build as build-srpm
+FROM centos-build as build8-srpm
 
 COPY ghactions-python-pipeline.spec rpmbuild/SPECS/
 COPY artefacts/ghactions-python-pipeline-*.tar.gz rpmbuild/SOURCES/
 
 RUN --network=none \
-    rpmbuild -bs rpmbuild/SPECS/ghactions-python-pipeline.spec
-# }}}
-
-# {{{ Container for SRPM
-FROM scratch as artefacts-srpm
-
-COPY --from=build-srpm /home/build/rpmbuild/SRPMS/* /
+    rpmbuild -bs rpmbuild/SPECS/artesca-kerberos-auth.spec
 # }}}
