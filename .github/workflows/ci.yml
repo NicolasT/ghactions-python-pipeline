@@ -19,7 +19,7 @@ jobs:
     runs-on: "ubuntu-latest"
     steps:
       - name: Placeholder
-        run: false
+        run: true
 
   e2e:
     runs-on: "ubuntu-latest"
