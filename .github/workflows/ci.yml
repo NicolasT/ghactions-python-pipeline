@@ -122,7 +122,7 @@ jobs:
               --cache-from=type=local,src=/tmp/.buildx-cache \
               --cache-to=type=local,dest=/tmp/.buildx-cache-new,mode=max \
               --target e2e-sdist \
-              --build-arg PACKAGE=ghactions-python-pipeline-*.whl \
+              --build-arg PACKAGE=ghactions_python_pipeline-*.whl \
               --tag ghactions-python-pipeline-e2e-sdist-wheel:ci \
               --load \
               .
