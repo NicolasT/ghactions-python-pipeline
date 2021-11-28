@@ -1,0 +1,35 @@
+[tool.poetry]
+name = "ghactions-python-pipeline"
+version = "0.1.0"
+description = "Test repository for a GitHub Actions-based build/test/release pipeline or a Python project."
+readme = "README.md"
+homepage = "https://github.com/NicolasT/ghactions-python-pipeline"
+repository = "https://github.com/NicolasT/ghactions-python-pipeline.git"
+authors = ["Nicolas Trangez <ikke@nicolast.be>"]
+license = "GPL-3.0"
+
+include = [
+    { path = "tests/", format = "sdist" },
+    { path = "docs/", format = "sdist" },
+    { path = "noxfile.py", format = "sdist" },
+    { path = "poetry.lock", format = "sdist" },
+]
+
+[tool.poetry.urls]
+Homepage = "https://github.com/NicolasT/ghactions-python-pipeline"
+Documentation = "https://nicolast.github.com/ghactions-python-pipeline"
+Changelog = "https://github.com/NicolasT/ghactions-python-pipeline/releases"
+Issues = "https://github.com/NicolasT/ghactions-python-pipeline/issues"
+"Pull Requests" = "https://github.com/NicolasT/ghactions-python-pipeline/pulls"
+
+[tool.poetry.scripts]
+ghactions-python-pipeline = "ghactions_python_pipeline.cli:main"
+
+[tool.poetry.dependencies]
+python = "^3.6"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.4"]
+build-backend = "poetry.core.masonry.api"

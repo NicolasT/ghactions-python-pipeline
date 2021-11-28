@@ -1,0 +1,364 @@
+---
+name: CI
+
+on:
+  - push
+
+permissions:
+  contents: read
+
+jobs:
+  package-sdist:
+    runs-on: "ubuntu-latest"
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v2.4.0
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1.6.0
+      - name: Cache Docker layers
+        uses: actions/cache@v2.1.7
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-sdist-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-sdist-
+
+      - name: Build sdist
+        run: |
+          docker buildx build \
+              --cache-from=type=local,src=/tmp/.buildx-cache \
+              --cache-to=type=local,dest=/tmp/.buildx-cache-new,mode=max \
+              --target artefacts-sdist \
+              --output type=local,dest=out \
+              .
+
+      - name: Move Docker image cache
+        # Temp fix
+        # https://github.com/docker/build-push-action/issues/252
+        # https://github.com/moby/buildkit/issues/1896
+        run: |
+          rm -rf /tmp/.buildx-cache
+          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+
+      - name: Upload artefacts
+        uses: "actions/upload-artifact@v2.2.4"
+        with:
+          name: artefacts
+          path: "out/"
+          if-no-files-found: error
+
+  e2e-sdist-tar:
+    runs-on: "ubuntu-latest"
+    needs:
+      - package-sdist
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v2.4.0
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1.6.0
+      - name: Cache Docker layers
+        uses: actions/cache@v2.1.7
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-e2e-sdist-tar-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-e2e-sdist-tar-
+
+      - name: Download artefacts
+        uses: actions/download-artifact@v2.0.10
+        with:
+          name: artefacts
+          path: "artefacts/"
+
+      - name: Build E2E image
+        run: |
+          docker buildx build \
+              --cache-from=type=local,src=/tmp/.buildx-cache \
+              --cache-to=type=local,dest=/tmp/.buildx-cache-new,mode=max \
+              --target e2e-sdist \
+              --build-arg PACKAGE=ghactions-python-pipeline-*.tar.gz \
+              --tag ghactions-python-pipeline-e2e-sdist-tar:ci \
+              --load \
+              .
+
+      - name: Move Docker image cache
+        # Temp fix
+        # https://github.com/docker/build-push-action/issues/252
+        # https://github.com/moby/buildkit/issues/1896
+        run: |
+          rm -rf /tmp/.buildx-cache
+          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+
+      - name: Run E2E tests
+        run: |
+          docker run --rm ghactions-python-pipeline-e2e-sdist-tar:ci
+
+  e2e-sdist-wheel:
+    runs-on: "ubuntu-latest"
+    needs:
+      - package-sdist
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v2.4.0
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1.6.0
+      - name: Cache Docker layers
+        uses: actions/cache@v2.1.7
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-e2e-sdist-wheel-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-e2e-sdist-wheel-
+
+      - name: Download artefacts
+        uses: actions/download-artifact@v2.0.10
+        with:
+          name: artefacts
+          path: "artefacts/"
+
+      - name: Build E2E image
+        run: |
+          docker buildx build \
+              --cache-from=type=local,src=/tmp/.buildx-cache \
+              --cache-to=type=local,dest=/tmp/.buildx-cache-new,mode=max \
+              --target e2e-sdist \
+              --build-arg PACKAGE=ghactions_python_pipeline-*.whl \
+              --tag ghactions-python-pipeline-e2e-sdist-wheel:ci \
+              --load \
+              .
+
+      - name: Move Docker image cache
+        # Temp fix
+        # https://github.com/docker/build-push-action/issues/252
+        # https://github.com/moby/buildkit/issues/1896
+        run: |
+          rm -rf /tmp/.buildx-cache
+          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+
+      - name: Run E2E tests
+        run: |
+          docker run --rm ghactions-python-pipeline-e2e-sdist-wheel:ci
+
+
+
+  package-srpm:
+    runs-on: "ubuntu-latest"
+    needs:
+      - package-sdist
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v2.4.0
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1.6.0
+      - name: Cache Docker layers
+        uses: actions/cache@v2.1.7
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-srpm-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-srpm-
+
+      - name: Download artefacts
+        uses: actions/download-artifact@v2.0.10
+        with:
+          name: artefacts
+          path: "artefacts/"
+
+      - name: Build srpm
+        run: |
+          docker buildx build \
+              --cache-from=type=local,src=/tmp/.buildx-cache \
+              --cache-to=type=local,dest=/tmp/.buildx-cache-new,mode=max \
+              --target artefacts-srpm \
+              --output type=local,dest=out \
+              .
+
+      - name: Move Docker image cache
+        # Temp fix
+        # https://github.com/docker/build-push-action/issues/252
+        # https://github.com/moby/buildkit/issues/1896
+        run: |
+          rm -rf /tmp/.buildx-cache
+          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+
+      - name: Upload artefacts
+        uses: "actions/upload-artifact@v2.2.4"
+        with:
+          name: artefacts
+          path: "out/"
+          if-no-files-found: error
+
+  package-centos8:
+    runs-on: "ubuntu-latest"
+    needs:
+      - package-srpm
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v2.4.0
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1.6.0
+      - name: Cache Docker layers
+        uses: actions/cache@v2.1.7
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-centos8-rpm-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-centos8-rpm-
+
+      - name: Download artefacts
+        uses: actions/download-artifact@v2.0.10
+        with:
+          name: artefacts
+          path: "artefacts/"
+
+      - name: Build RPM
+        run: |
+          docker buildx build \
+              --cache-from=type=local,src=/tmp/.buildx-cache \
+              --cache-to=type=local,dest=/tmp/.buildx-cache-new,mode=max \
+              --target artefacts-centos8-rpm \
+              --output type=local,dest=out \
+              .
+
+      - name: Move Docker image cache
+        # Temp fix
+        # https://github.com/docker/build-push-action/issues/252
+        # https://github.com/moby/buildkit/issues/1896
+        run: |
+          rm -rf /tmp/.buildx-cache
+          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+
+      - name: Upload artefacts
+        uses: "actions/upload-artifact@v2.2.4"
+        with:
+          name: artefacts
+          path: "out/"
+          if-no-files-found: error
+
+  e2e-centos8:
+    runs-on: "ubuntu-latest"
+    needs:
+      - package-centos8
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v2.4.0
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1.6.0
+      - name: Cache Docker layers
+        uses: actions/cache@v2.1.7
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-centos8-rpm-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-centos8-rpm-
+
+      - name: Download artefacts
+        uses: actions/download-artifact@v2.0.10
+        with:
+          name: artefacts
+          path: "artefacts/"
+
+      - name: Build E2E image
+        run: |
+          docker buildx build \
+              --cache-from=type=local,src=/tmp/.buildx-cache \
+              --cache-to=type=local,dest=/tmp/.buildx-cache-new,mode=max \
+              --target e2e-centos8 \
+              --tag ghactions-python-pipeline-e2e-centos8:ci \
+              --load \
+              .
+
+      - name: Move Docker image cache
+        # Temp fix
+        # https://github.com/docker/build-push-action/issues/252
+        # https://github.com/moby/buildkit/issues/1896
+        run: |
+          rm -rf /tmp/.buildx-cache
+          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+
+      - name: Run E2E tests
+        run: |
+          docker run --rm ghactions-python-pipeline-e2e-centos8:ci
+
+  package-fedora:
+    runs-on: "ubuntu-latest"
+    needs:
+      - package-srpm
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v2.4.0
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1.6.0
+      - name: Cache Docker layers
+        uses: actions/cache@v2.1.7
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-fedora-rpm-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-fedora-rpm-
+
+      - name: Download artefacts
+        uses: actions/download-artifact@v2.0.10
+        with:
+          name: artefacts
+          path: "artefacts/"
+
+      - name: Build RPM
+        run: |
+          docker buildx build \
+              --cache-from=type=local,src=/tmp/.buildx-cache \
+              --cache-to=type=local,dest=/tmp/.buildx-cache-new,mode=max \
+              --target artefacts-fedora-rpm \
+              --output type=local,dest=out \
+              .
+
+      - name: Move Docker image cache
+        # Temp fix
+        # https://github.com/docker/build-push-action/issues/252
+        # https://github.com/moby/buildkit/issues/1896
+        run: |
+          rm -rf /tmp/.buildx-cache
+          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+
+      - name: Upload artefacts
+        uses: "actions/upload-artifact@v2.2.4"
+        with:
+          name: artefacts
+          path: "out/"
+          if-no-files-found: error
+
+  e2e-fedora:
+    runs-on: "ubuntu-latest"
+    needs:
+      - package-fedora
+    steps:
+      - name: Placeholder
+        run: true
+
+  test:
+    runs-on: "ubuntu-latest"
+    steps:
+      - name: Placeholder
+        run: true
+
+  e2e:
+    runs-on: "ubuntu-latest"
+    needs:
+      - e2e-centos8
+      - e2e-fedora
+    steps:
+      - name: Placeholder
+        run: true
+
+  release:
+    runs-on: "ubuntu-latest"
+    needs:
+      - package-sdist
+      - package-srpm
+      - package-centos8
+      - package-fedora
+      - test
+      - e2e
+    steps:
+      - name: Placeholder
+        run: true
