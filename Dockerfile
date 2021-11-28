@@ -83,8 +83,6 @@ FROM centos8-build as build-rpm-centos8
 
 COPY artefacts/ghactions-python-pipeline-*.src.rpm rpmbuild/SRPMS/
 
-RUN find rpmbuild
-
 USER root
 RUN --mount=type=cache,id=dnf-centos,target=/var/cache/dnf,sharing=locked \
     dnf --setopt="keepcache=1" builddep -y rpmbuild/SRPMS/ghactions-python-pipeline-*.src.rpm

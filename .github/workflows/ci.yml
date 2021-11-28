@@ -184,7 +184,7 @@ jobs:
 
       - name: Run E2E tests
         run: |
-          docker run --rm ghactions-python-pipeline-centos8-e2e:ci
+          docker run --rm ghactions-python-pipeline-e2e-centos8:ci
 
   package-fedora:
     runs-on: "ubuntu-latest"
