@@ -60,3 +60,23 @@ FROM scratch as artefacts-srpm
 COPY --from=build-srpm /home/build/rpmbuild/SRPMS/* /
 # }}}
 
+# {{{ Build the RPM package
+FROM centos8-build as build-rpm-centos8
+
+COPY artefacts/ghactions-python-pipeline-*.src.rpm rpmbuild/SRPMS/
+
+USER root
+RUN --mount=type=cache,id=dnf-centos,target=/var/cache/dnf,sharing=locked \
+    dnf --setopt="keepcache=1" builddep -y rpmbuild/SRPMS/ghactions-python-pipeline-*.src.rpm
+
+USER build
+
+RUN --network=none \
+    rpmbuild --rebuild rpmbuild/SRPMS/ghactions-python-pipeline-*.src.rpm
+# }}}
+
+# {{{ Container for CentOS 8 RPM
+FROM scratch as artefacts-centos8-rpm
+
+COPY --from=build-rpm-centos8 /home/build/rpmbuild/RPMS/*/* /
+# }}}
