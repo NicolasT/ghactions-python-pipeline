@@ -117,6 +117,9 @@ jobs:
           name: artefacts
           path: "artefacts/"
 
+      - name: list
+        run: find artefacts
+
       - name: Build RPM
         run: |
           docker buildx build \
