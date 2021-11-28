@@ -150,7 +150,7 @@ RUN apk add --no-cache \
 
 ARG PACKAGE
 
-RUN --mount=type=bind,source=artefacts/,target=/tmp/artefacts
+RUN --mount=type=bind,source=artefacts/,target=/tmp/artefacts \
     python -m pip install /tmp/artefacts/$PACKAGE
 
 ENTRYPOINT ["ghactions-python-pipeline"]
