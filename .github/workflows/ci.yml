@@ -19,25 +19,33 @@ jobs:
     runs-on: "ubuntu-latest"
     needs:
       - package-sdist
-    steps: []
+    steps:
+      - name: Placeholder
+        run: true
 
   package-centos7-rpm:
     runs-on: "ubuntu-latest"
     needs:
       - package-srpm
-    steps: []
+    steps:
+      - name: Placeholder
+        run: true
 
   package-centos8-rpm:
     runs-on: "ubuntu-latest"
     needs:
       - package-srpm
-    steps: []
+    steps:
+      - name: Placeholder
+        run: true
 
   package-fedora-rpm:
     runs-on: "ubuntu-latest"
     needs:
       - package-srpm
-    steps: []
+    steps:
+      - name: Placeholder
+        run: true
 
   test:
     runs-on: "ubuntu-latest"
