@@ -54,7 +54,7 @@ jobs:
         run: true
 
   fedora:
-    uses: ./build.yml
+    uses: ./build.yml@HEAD
 
   e2e:
     runs-on: "ubuntu-latest"
