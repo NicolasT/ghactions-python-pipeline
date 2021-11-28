@@ -29,7 +29,7 @@ jobs:
               --cache-from=type=local,src=/tmp/.buildx-cache \
               --cache-to=type=local,dest=/tmp/.buildx-cache-new,mode=max \
               --target artefacts-sdist \
-              --output type=local,dest=artefacts \
+              --output type=local,dest=out \
               .
 
       - name: Move Docker image cache
@@ -44,7 +44,7 @@ jobs:
         uses: "actions/upload-artifact@v2.2.4"
         with:
           name: artefacts
-          path: "artefacts/"
+          path: "out/"
           if-no-files-found: error
 
   package-srpm:
@@ -64,13 +64,19 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-buildx-
 
+      - name: Download artefacts
+        uses: actions/download-artifact@v2.0.10
+        with:
+          name: artefacts
+          path: "artefacts/"
+
       - name: Build srpm
         run: |
           docker buildx build \
               --cache-from=type=local,src=/tmp/.buildx-cache \
               --cache-to=type=local,dest=/tmp/.buildx-cache-new,mode=max \
               --target artefacts-srpm \
-              --output type=local,dest=artefacts \
+              --output type=local,dest=out \
               .
 
       - name: Move Docker image cache
@@ -84,7 +90,7 @@ jobs:
       - name: Upload artefacts
         uses: "actions/upload-artifact@v2.2.4"
         with:
-          name: artefacts
+          name: out
           path: "artefacts/"
           if-no-files-found: error
 
